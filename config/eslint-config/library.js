@@ -4,6 +4,7 @@ module.exports = {
   plugins: ['simple-import-sort'],
   rules: {
     'simple-import-sort/imports': 'error',
+    "comma-dangle": ["error", "never"],
     'prettier/prettier': [
       'error',
       {

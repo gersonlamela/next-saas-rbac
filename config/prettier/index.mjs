@@ -11,7 +11,7 @@ const config = {
   parser: "flow",
   quoteProps: "as-needed",
   jsxSingleQuote: false,
-  trailingComma: "es5",
+  trailingComma: "none",
   bracketSpacing: true,
   arrowParens: "always",
   bracketSameLine: false,
