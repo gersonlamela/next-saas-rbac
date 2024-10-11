@@ -1,15 +1,10 @@
 import { env } from '@saas/env'
 import type { FastifyInstance } from 'fastify'
-import { ZodTypeProvider } from 'fastify-type-provider-zod'
-import z from 'zod'
+import type { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { z } from 'zod'
 
+import { BadRequestError } from '@/http/routes/_errors/bad-request-error'
 import { prisma } from '@/lib/prisma'
-
-import { BadRequestError } from '../_errors/bad-request-error'
-
-const authenticateWithGithubSchema = z.object({
-  code: z.string(),
-})
 
 export async function authenticateWithGithub(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().post(
@@ -17,15 +12,19 @@ export async function authenticateWithGithub(app: FastifyInstance) {
     {
       schema: {
         tags: ['Auth'],
-        summary: 'Authenticate with Github',
-        body: authenticateWithGithubSchema,
+        summary: 'Authenticate with GitHub',
+        body: z.object({
+          code: z.string(),
+        }),
         response: {
-          201: z.object({ token: z.string() }),
+          201: z.object({
+            token: z.string(),
+          }),
         },
       },
     },
     async (request, reply) => {
-      const { code } = authenticateWithGithubSchema.parse(request.body)
+      const { code } = request.body
 
       const githubOAuthURL = new URL(
         'https://github.com/login/oauth/access_token',
@@ -88,16 +87,14 @@ export async function authenticateWithGithub(app: FastifyInstance) {
       }
 
       let user = await prisma.user.findUnique({
-        where: {
-          email,
-        },
+        where: { email },
       })
 
       if (!user) {
         user = await prisma.user.create({
           data: {
-            name,
             email,
+            name,
             avatarUrl,
           },
         })
@@ -133,7 +130,7 @@ export async function authenticateWithGithub(app: FastifyInstance) {
         },
       )
 
-      return reply.status(201).send(token)
+      return reply.status(201).send({ token })
     },
   )
 }
