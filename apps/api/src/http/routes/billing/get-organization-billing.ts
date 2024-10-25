@@ -1,16 +1,11 @@
 import type { FastifyInstance } from 'fastify'
-import { ZodTypeProvider } from 'fastify-type-provider-zod'
-import z from 'zod'
+import type { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { z } from 'zod'
 
 import { auth } from '@/http/middlewares/auth'
+import { UnauthorizedError } from '@/http/routes/_errors/unauthorized-error'
 import { prisma } from '@/lib/prisma'
 import { getUserPermissions } from '@/utils/get-user-permissions'
-
-import { UnauthorizedError } from '../_errors/unauthorized-error'
-
-const getOrganizationBillingParams = z.object({
-  slug: z.string(),
-})
 
 export async function getOrganizationBilling(app: FastifyInstance) {
   app
@@ -20,10 +15,12 @@ export async function getOrganizationBilling(app: FastifyInstance) {
       '/organizations/:slug/billing',
       {
         schema: {
-          tags: ['billing'],
+          tags: ['Billing'],
           summary: 'Get billing information from organization',
           security: [{ bearerAuth: [] }],
-          params: getOrganizationBillingParams,
+          params: z.object({
+            slug: z.string(),
+          }),
           response: {
             200: z.object({
               billing: z.object({
@@ -44,7 +41,7 @@ export async function getOrganizationBilling(app: FastifyInstance) {
         },
       },
       async (request) => {
-        const { slug } = getOrganizationBillingParams.parse(request.params)
+        const { slug } = request.params
         const userId = await request.getCurrentUserId()
         const { organization, membership } =
           await request.getUserMembership(slug)
@@ -53,18 +50,17 @@ export async function getOrganizationBilling(app: FastifyInstance) {
 
         if (cannot('get', 'Billing')) {
           throw new UnauthorizedError(
-            `You're not allowed to get billing details from this organization`,
+            `You're not allowed to get billing details from this organization.`,
           )
         }
 
-        const [amountOfMembers, amountOfProject] = await Promise.all([
+        const [amountOfMembers, amountOfProjects] = await Promise.all([
           prisma.member.count({
             where: {
               organizationId: organization.id,
               role: { not: 'BILLING' },
             },
           }),
-
           prisma.project.count({
             where: {
               organizationId: organization.id,
@@ -80,11 +76,11 @@ export async function getOrganizationBilling(app: FastifyInstance) {
               price: amountOfMembers * 10,
             },
             projects: {
-              amount: amountOfProject,
+              amount: amountOfProjects,
               unit: 20,
-              price: amountOfProject + 20,
+              price: amountOfProjects * 20,
             },
-            total: amountOfMembers * 10 + amountOfProject * 20,
+            total: amountOfMembers * 10 + amountOfProjects * 20,
           },
         }
       },

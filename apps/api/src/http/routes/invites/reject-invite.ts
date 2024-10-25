@@ -1,15 +1,10 @@
 import type { FastifyInstance } from 'fastify'
-import { ZodTypeProvider } from 'fastify-type-provider-zod'
-import z from 'zod'
+import type { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { z } from 'zod'
 
 import { auth } from '@/http/middlewares/auth'
+import { BadRequestError } from '@/http/routes/_errors/bad-request-error'
 import { prisma } from '@/lib/prisma'
-
-import { BadRequestError } from '../_errors/bad-request-error'
-
-const rejectInviteSchema = z.object({
-  inviteId: z.string().uuid(),
-})
 
 export async function rejectInvite(app: FastifyInstance) {
   app
@@ -21,17 +16,17 @@ export async function rejectInvite(app: FastifyInstance) {
         schema: {
           tags: ['Invites'],
           summary: 'Reject an invite',
-          params: rejectInviteSchema,
+          params: z.object({
+            inviteId: z.string().uuid(),
+          }),
           response: {
-            204: z.object({
-              invite: z.null(),
-            }),
+            204: z.null(),
           },
         },
       },
       async (request, reply) => {
         const userId = await request.getCurrentUserId()
-        const { inviteId } = rejectInviteSchema.parse(request.params)
+        const { inviteId } = request.params
 
         const invite = await prisma.invite.findUnique({
           where: {
@@ -50,16 +45,16 @@ export async function rejectInvite(app: FastifyInstance) {
         })
 
         if (!user) {
-          throw new BadRequestError('User not found')
+          throw new BadRequestError('User not found.')
         }
 
         if (invite.email !== user.email) {
           throw new BadRequestError('This invite belongs to another user.')
         }
 
-        prisma.invite.delete({
+        await prisma.invite.delete({
           where: {
-            id: inviteId,
+            id: invite.id,
           },
         })
 

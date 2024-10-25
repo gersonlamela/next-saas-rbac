@@ -18,7 +18,7 @@ export async function getMemberShip(app: FastifyInstance) {
       {
         schema: {
           tags: ['Organizations'],
-          summary: 'Get user memebership on organization',
+          summary: 'Get user membership on organization',
           security: [{ bearerAuth: [] }],
           params: slugSchema,
           response: {

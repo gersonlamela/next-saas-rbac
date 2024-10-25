@@ -9,7 +9,7 @@ export default async function OrgLayout({
 }>) {
   return (
     <div className="px-4">
-      <div className="pt-6">
+      <div className="py-6">
         <Header />
         <Tabs />
       </div>

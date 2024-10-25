@@ -6,6 +6,7 @@ import rocketseatIcon from '@/assets/rocketseat-icon.svg'
 import { ability } from '@/auth/auth'
 
 import OrganizationSwitcher from './organization-switcher'
+import PendingInvites from './pending-invites'
 import { ProfileButton } from './profile-button'
 import ProjectSwitcher from './project-switcher'
 import ThemeSwitcher from './theme/theme-switcher'
@@ -35,6 +36,7 @@ export default async function Header() {
       </div>
       <div className="flex items-center gap-4">
         <Separator orientation="vertical" className="h-5" />
+        <PendingInvites />
         <ThemeSwitcher />
         <ProfileButton />
       </div>

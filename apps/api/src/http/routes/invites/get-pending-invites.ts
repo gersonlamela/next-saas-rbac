@@ -1,12 +1,11 @@
 import { roleSchema } from '@saas/auth'
 import type { FastifyInstance } from 'fastify'
-import { ZodTypeProvider } from 'fastify-type-provider-zod'
-import z from 'zod'
+import type { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { z } from 'zod'
 
 import { auth } from '@/http/middlewares/auth'
+import { BadRequestError } from '@/http/routes/_errors/bad-request-error'
 import { prisma } from '@/lib/prisma'
-
-import { BadRequestError } from '../_errors/bad-request-error'
 
 export async function getPendingInvites(app: FastifyInstance) {
   app
@@ -17,7 +16,7 @@ export async function getPendingInvites(app: FastifyInstance) {
       {
         schema: {
           tags: ['Invites'],
-          summary: 'Get all user pending invite',
+          summary: 'Get all user pending invites',
           response: {
             200: z.object({
               invites: z.array(
@@ -56,9 +55,6 @@ export async function getPendingInvites(app: FastifyInstance) {
         }
 
         const invites = await prisma.invite.findMany({
-          where: {
-            email: user.email,
-          },
           select: {
             id: true,
             email: true,
@@ -76,6 +72,9 @@ export async function getPendingInvites(app: FastifyInstance) {
                 name: true,
               },
             },
+          },
+          where: {
+            email: user.email,
           },
         })
 
