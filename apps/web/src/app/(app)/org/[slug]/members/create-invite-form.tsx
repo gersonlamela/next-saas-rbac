@@ -17,8 +17,13 @@ import { useFormState } from '@/hooks/use-form-state'
 import { createInviteAction } from './actions'
 
 export function CreateInviteForm() {
-  const [{ errors, message, success }, handleSubmit, isPending] =
-    useFormState(createInviteAction)
+  const [{ errors, message, success }, handleSubmit, isPending] = useFormState(
+    createInviteAction,
+    () => {
+      // Código para ser executado após o sucesso do envio do formulário
+      console.log('Convite criado com sucesso!')
+    },
+  )
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
