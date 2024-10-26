@@ -1,12 +1,7 @@
 import Header from '@/components/header'
 import { Tabs } from '@/components/tabs'
 
-export default async function OrgLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-  sheet: React.ReactNode
-}>) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="px-4">
       <div className="py-6">
