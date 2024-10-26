@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 'use client'
 
 import * as SeparatorPrimitive from '@radix-ui/react-separator'
